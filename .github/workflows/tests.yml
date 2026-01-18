@@ -1,12 +1,3 @@
-name: Tests
-
-on:
-  push:
-    branches:
-      - '**'
-    tags:
-      - '**'
-
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -19,12 +10,15 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Run tests only for public repositories
-        if: github.event.repository.private == false
+      - name: Run tests
+        id: run_tests
+        continue-on-error: true
         uses: Yandex-Practicum/test-project-action@v1
         with:
           project: 'ono-tebe-nado-ad'
       
-      - name: Skip tests for private repositories
-        if: github.event.repository.private
-        run: echo "Skipping tests for private repository"
+      - name: Check test results
+        if: steps.run_tests.outcome != 'success'
+        run: |
+          echo "Tests failed"
+          exit 1
